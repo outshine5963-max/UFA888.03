@@ -1,0 +1,1225 @@
+<!DOCTYPE html>
+<html lang="th" class="dark h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TypeMaster Pro - Skill & Speed Trainer</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .font-mono-code {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        
+        /* Key Cap Styles */
+        .key-cap {
+            transition: transform 0.06s ease, background-color 0.1s ease, border-color 0.1s ease, box-shadow 0.1s ease;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        .key-cap:active, .key-cap.active {
+            transform: translateY(2px) scale(0.96);
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border-color: #818cf8 !important;
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.6);
+        }
+        .key-cap.target {
+            animation: keyPulse 1.2s infinite alternate;
+            border-color: #6366f1 !important;
+        }
+        @keyframes keyPulse {
+            0% { transform: scale(1); box-shadow: 0 0 2px rgba(99, 102, 241, 0.2); }
+            100% { transform: scale(1.05); box-shadow: 0 0 14px rgba(129, 140, 248, 0.8); }
+        }
+
+        /* Character Highlight Rules */
+        .char-correct {
+            color: #10b981 !important; /* Green */
+            background-color: rgba(16, 185, 129, 0.15);
+            border-radius: 3px;
+            padding: 0 1px;
+        }
+        .char-incorrect {
+            color: #ef4444 !important; /* Red */
+            background-color: rgba(239, 68, 68, 0.2);
+            border-radius: 3px;
+            text-decoration: underline;
+            padding: 0 1px;
+            font-weight: 600;
+        }
+        
+        /* Special handling for Thai combining diacritics when typed incorrectly */
+        .char-incorrect-diacritic {
+            color: #ef4444 !important;
+            background-color: rgba(239, 68, 68, 0.25);
+            border: 1px dashed #ef4444;
+            border-radius: 4px;
+            padding: 0 3px;
+            margin: 0 1px;
+            display: inline-block;
+            font-weight: 700;
+        }
+
+        .char-current {
+            background-color: #6366f1;
+            color: #ffffff !important;
+            border-radius: 3px;
+            padding: 0 2px;
+            animation: cursorBlink 1s infinite;
+        }
+        .char-default {
+            color: #94a3b8;
+        }
+        .dark .char-default {
+            color: #64748b;
+        }
+
+        @keyframes cursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        /* Scrollbar customization */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: rgba(30, 41, 59, 0.5);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.5);
+            border-radius: 4px;
+        }
+
+        /* Slider Custom Styling */
+        input[type=range]::-webkit-slider-thumb {
+            background: #6366f1;
+            border: 2px solid #ffffff;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            -webkit-appearance: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+
+    <header class="bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700/80 sticky top-0 z-30 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-gradient-to-tr from-indigo-600 to-violet-500 text-white rounded-2xl shadow-md shadow-indigo-500/20">
+                    <i class="fa-solid fa-keyboard text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 dark:from-indigo-400 dark:to-violet-300 bg-clip-text text-transparent">
+                        TypeMaster Pro
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">ระบบฝึกพิมพ์ดีด & วัดความเร็วภาษาไทย / English</p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <!-- Language Toggle Button -->
+                <button id="lang-toggle-btn" onclick="toggleLanguage()" class="flex items-center space-x-2 bg-indigo-50 dark:bg-indigo-500/10 hover:bg-indigo-100 dark:hover:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all shadow-sm">
+                    <i class="fa-solid fa-language text-indigo-500 dark:text-indigo-400 text-base"></i>
+                    <span id="lang-label">ภาษาไทย (TH)</span>
+                </button>
+
+                <!-- Dark / Light Mode Switcher -->
+                <button onclick="toggleDarkMode()" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 transition-colors border border-slate-200 dark:border-slate-600" title="เปลี่ยนธีม">
+                    <i id="theme-icon" class="fa-solid fa-moon"></i>
+                </button>
+
+                <!-- Custom Text Management Button -->
+                <button onclick="toggleModal('manage-modal')" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 transition-colors border border-slate-200 dark:border-slate-600" title="จัดการบทความฝึกพิมพ์">
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                </button>
+
+                <!-- Practice History Modal Button -->
+                <button onclick="toggleModal('history-modal')" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 transition-colors border border-slate-200 dark:border-slate-600" title="ประวัติการฝึกซ้อม">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                </button>
+
+                <!-- Info Modal Button -->
+                <button onclick="toggleModal('info-modal')" class="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600 text-indigo-600 dark:text-indigo-400 transition-colors border border-slate-200 dark:border-slate-600" title="คำแนะนำ">
+                    <i class="fa-solid fa-circle-question text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col gap-5 justify-center">
+
+        <!-- Control Bar & Timer Slider with Added Reset Button -->
+        <div class="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4 sm:p-5 shadow-sm transition-colors flex flex-col md:flex-row items-center justify-between gap-4">
+            <!-- Start / Stop / Reset Control Buttons & Status Indicator -->
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start flex-wrap gap-2">
+                <div class="flex items-center space-x-2">
+                    <button id="start-btn" onclick="startTestExplicit()" class="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-500 text-white font-medium px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-emerald-600/20 transition-all">
+                        <i class="fa-solid fa-play"></i>
+                        <span id="start-btn-text">เริ่มทำงาน</span>
+                    </button>
+                    <button id="stop-btn" onclick="stopTestExplicit()" disabled class="flex items-center space-x-2 bg-rose-600 hover:bg-rose-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md shadow-rose-600/20 transition-all">
+                        <i class="fa-solid fa-stop"></i>
+                        <span>หยุดทำงาน</span>
+                    </button>
+                    <!-- Added Reset Button in Control Bar -->
+                    <button onclick="resetTest()" class="flex items-center space-x-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-medium px-4 py-2.5 rounded-xl text-xs sm:text-sm shadow-md transition-all" title="เริ่มใหม่ (Reset)">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>เริ่มใหม่</span>
+                    </button>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="flex items-center space-x-2 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700">
+                    <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                    <span id="status-text" class="text-xs font-semibold text-slate-600 dark:text-slate-300">พร้อมทำงาน</span>
+                </div>
+            </div>
+
+            <!-- Timer Countdown Slider Control -->
+            <div class="w-full md:w-72 bg-slate-50 dark:bg-slate-900/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 flex flex-col space-y-1.5">
+                <div class="flex justify-between items-center text-xs">
+                    <span class="font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-hourglass-half text-indigo-500"></i> ตั้งเวลาถอยหลัง:
+                    </span>
+                    <span id="timer-setting-label" class="font-bold text-indigo-600 dark:text-indigo-400">ไม่จำกัดเวลา</span>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <input type="range" id="timer-range-slider" min="0" max="300" step="10" value="0" oninput="handleTimerSliderChange(this.value)" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer">
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-400">
+                    <span>ไม่จำกัด</span>
+                    <span>60s</span>
+                    <span>180s</span>
+                    <span>300s</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 p-4 rounded-2xl flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">ความเร็ว (WPM)</p>
+                    <h3 id="stat-wpm" class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 rounded-xl">
+                    <i class="fa-solid fa-bolt text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 p-4 rounded-2xl flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">ความถูกต้อง (%)</p>
+                    <h3 id="stat-accuracy" class="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">100%</h3>
+                </div>
+                <div class="p-3 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                    <i class="fa-solid fa-bullseye text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 p-4 rounded-2xl flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <p id="time-stat-title" class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">เวลา (วินาที)</p>
+                    <h3 id="stat-time" class="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 rounded-xl">
+                    <i class="fa-solid fa-clock text-xl"></i>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 p-4 rounded-2xl flex items-center justify-between shadow-sm transition-colors">
+                <div>
+                    <p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">พิมพ์ผิด (ครั้ง)</p>
+                    <h3 id="stat-errors" class="text-3xl font-bold text-rose-600 dark:text-rose-400 mt-1">0</h3>
+                </div>
+                <div class="p-3 bg-rose-50 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 rounded-xl">
+                    <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 sm:p-6 shadow-lg relative overflow-hidden transition-colors">
+            <!-- Text Selection Header -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-200 dark:border-slate-700/80">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs font-medium text-slate-500 dark:text-slate-400">เลือกบทความ:</span>
+                    <select id="text-select" onchange="loadSelectedText()" class="bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-xs text-slate-800 dark:text-slate-200 rounded-xl px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 max-w-[200px] sm:max-w-xs truncate">
+                        <!-- Options dynamically loaded -->
+                    </select>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="resetTest()" class="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs px-3 py-1.5 rounded-xl border border-slate-300 dark:border-slate-600 transition-all shadow-sm">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>เริ่มใหม่</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Typing Interactive Display -->
+            <div id="text-display" class="font-mono-code text-lg sm:text-2xl leading-relaxed tracking-wide min-h-[140px] max-h-[220px] overflow-y-auto p-4 sm:p-5 bg-slate-50 dark:bg-slate-900/90 rounded-xl border border-slate-200 dark:border-slate-700/60 break-words font-medium select-none">
+                <!-- Spans generated dynamically -->
+            </div>
+
+            <!-- Hidden Input Field to Capture Typing Events -->
+            <input type="text" id="type-input" class="absolute opacity-0 pointer-events-none" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+            <!-- Focus / Paused Overlay Prompt -->
+            <div id="focus-overlay" onclick="focusTypingInput()" class="absolute inset-0 bg-slate-900/60 dark:bg-slate-900/80 backdrop-blur-sm flex items-center justify-center cursor-pointer transition-opacity z-10 rounded-2xl">
+                <div class="text-center p-4">
+                    <div id="overlay-icon-container" class="w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/30 animate-bounce">
+                        <i id="overlay-icon" class="fa-solid fa-play"></i>
+                    </div>
+                    <p id="focus-message" class="text-sm font-semibold text-white">กดปุ่ม "เริ่มทำงาน" หรือคลิกที่นี่เพื่อเริ่มฝึกพิมพ์</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700 p-3 sm:p-4 rounded-2xl shadow-lg flex flex-col gap-2 transition-colors">
+            <div class="flex flex-wrap justify-between items-center text-xs text-slate-500 dark:text-slate-400 px-1 mb-1 gap-2">
+                <span id="keyboard-layout-title" class="font-medium text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <i class="fa-solid fa-keyboard text-indigo-500 dark:text-indigo-400"></i> แป้นพิมพ์จำลอง: ภาษาไทย (Kedmanee)
+                </span>
+                <span class="flex items-center gap-2">
+                    <span id="shift-indicator" class="hidden px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/40 font-bold">Shift Active</span>
+                    <span id="caps-indicator" class="hidden px-2 py-0.5 rounded bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/40 font-bold">Caps Lock</span>
+                </span>
+            </div>
+
+            <!-- Virtual Keyboard Keys Container -->
+            <div id="virtual-keyboard" class="flex flex-col gap-1 sm:gap-1.5 w-full select-none font-mono-code text-xs">
+                <!-- Dynamically constructed rows -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-4 text-xs text-slate-400 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800">
+        TypeMaster Pro Speed & Skill Trainer &copy; Pure HTML, CSS & Vanilla JS Application
+    </footer>
+
+    <!-- Custom Notification Toast Container -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 px-4 py-3 rounded-xl shadow-xl flex items-center space-x-3 transition-all transform translate-y-20 opacity-0 pointer-events-none">
+        <i id="toast-icon" class="fa-solid fa-circle-info text-indigo-400 dark:text-indigo-600"></i>
+        <span id="toast-message" class="text-xs font-medium">ข้อความแจ้งเตือน</span>
+    </div>
+
+    <!-- Modal: Manage Passages -->
+    <div id="manage-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-xl w-full border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-indigo-500 dark:text-indigo-400"></i> จัดการบทความฝึกพิมพ์
+                </h3>
+                <button onclick="toggleModal('manage-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="p-5 overflow-y-auto space-y-4 text-sm">
+                <!-- Add New Passage Form -->
+                <form id="add-text-form" onsubmit="handleAddText(event)" class="space-y-3 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200 dark:border-slate-700/60">
+                    <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">เพิ่มบทความใหม่</h4>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">หัวข้อบทความ *</label>
+                        <input type="text" id="new-text-title" required placeholder="เช่น บทความฝึกความเร็วชุดที่ 1..." class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">ภาษา *</label>
+                        <select id="new-text-lang" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="th">ภาษาไทย (TH)</option>
+                            <option value="en">English (EN)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">เนื้อหาสำหรับฝึกพิมพ์ *</label>
+                        <textarea id="new-text-content" rows="3" required placeholder="พิมพ์ประโยคหรือข้อความที่ต้องการนำมาฝึกพิมพ์..." class="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium transition-colors shadow-sm">
+                        <i class="fa-solid fa-plus mr-1"></i> บันทึกบทความใหม่
+                    </button>
+                </form>
+
+                <!-- List of Custom Passages -->
+                <div>
+                    <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">บทความที่คุณเพิ่มเอง</h4>
+                    <div id="custom-text-list" class="space-y-2 max-h-48 overflow-y-auto">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: History Log -->
+    <div id="history-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-indigo-500 dark:text-indigo-400"></i> ประวัติผลการทดสอบ
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearHistory()" class="text-xs text-rose-500 hover:text-rose-600 dark:text-rose-400 px-2.5 py-1 rounded-lg border border-rose-200 dark:border-rose-500/30 bg-rose-50 dark:bg-rose-500/10">
+                        ล้างประวัติ
+                    </button>
+                    <button onclick="toggleModal('history-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                        <i class="fa-solid fa-xmark text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="p-5 overflow-y-auto">
+                <div id="history-list" class="space-y-2 max-h-80 overflow-y-auto">
+                    <!-- History items loaded dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Instructions & Thai Diacritics Rules -->
+    <div id="info-modal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-lg w-full border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+                <h3 class="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-info text-indigo-500 dark:text-indigo-400"></i> คู่มือและการแสดงผลสระ-วรรณยุกต์
+                </h3>
+                <button onclick="toggleModal('info-modal')" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-3 text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+                <p><strong>TypeMaster Pro</strong> ช่วยฝึกทักษะการพิมพ์ดีดพร้อมฟังก์ชันการตั้งเวลาถอยหลัง และระบบไฮไลต์แป้นพิมพ์จำลองแบบเรียลไทม์</p>
+                
+                <div class="p-3 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30 rounded-xl space-y-1">
+                    <h5 class="font-bold text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-star"></i> กฎการแสดงผล สระ และ วรรณยุกต์ไทย
+                    </h5>
+                    <p class="text-[11px] text-amber-800 dark:text-amber-300">
+                        เมื่อพิมพ์สระบน/สระล่าง หรือวรรณยุกต์ไทย (เช่น ิ, ี, ึ, ื, ุ, ู, ่, ้, ๊, ๋, ็, ์) ผิด โปรแกรมจะแยกแสดงสระ/วรรณยุกต์นั้นบนวงกลมจุดไข่ปลาสีแดง <span class="char-incorrect-diacritic">◌่</span> เพื่อให้เห็นจุดผิดพลาดได้อย่างชัดเจน ไม่ซ้อนทับหรือกลืนไปกับตัวอักษรตั้งต้น
+                    </p>
+                </div>
+
+                <ul class="list-disc pl-4 space-y-1 text-slate-500 dark:text-slate-400">
+                    <li><strong class="text-emerald-600 dark:text-emerald-400">ปุ่มเริ่มทำงาน / หยุดทำงาน / เริ่มใหม่:</strong> ควบคุมการเปิดปิดการทำงาน รีเซ็ต และหยุดเวลาชั่วคราว</li>
+                    <li><strong class="text-amber-600 dark:text-amber-400">แถบตั้งเวลา Slider:</strong> กำหนดเวลาถอยหลัง 10-300 วินาที หรือเลือกแบบไม่จำกัดเวลา</li>
+                </ul>
+            </div>
+            <div class="p-4 border-t border-slate-200 dark:border-slate-700 flex justify-end">
+                <button onclick="toggleModal('info-modal')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-medium">เข้าใจแล้ว</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Thai Kedmanee Layout Definition
+        const TH_LAYOUT = [
+            [
+                { normal: '_', shift: '%', code: 'Backquote' },
+                { normal: 'ๅ', shift: '+', code: 'Digit1' },
+                { normal: '/', shift: '"', code: 'Digit2' },
+                { normal: '-', shift: '/', code: 'Digit3' },
+                { normal: 'ภ', shift: ',', code: 'Digit4' },
+                { normal: 'ถ', shift: '?', code: 'Digit5' },
+                { normal: 'ุ', shift: 'ู', code: 'Digit6' },
+                { normal: 'ึ', shift: '฿', code: 'Digit7' },
+                { normal: 'ค', shift: '๕', code: 'Digit8' },
+                { normal: 'ต', shift: '๖', code: 'Digit9' },
+                { normal: 'จ', shift: '๗', code: 'Digit0' },
+                { normal: 'ข', shift: '๘', code: 'Minus' },
+                { normal: 'ช', shift: '๙', code: 'Equal' },
+                { normal: 'Backspace', shift: 'Backspace', code: 'Backspace', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Tab', shift: 'Tab', code: 'Tab', width: 'w-10 sm:w-12' },
+                { normal: 'ๆ', shift: '๐', code: 'KeyQ' },
+                { normal: 'ำ', shift: '"', code: 'KeyW' },
+                { normal: 'พ', shift: 'ฎ', code: 'KeyE' },
+                { normal: 'ะ', shift: 'ฑ', code: 'KeyR' },
+                { normal: 'ั', shift: 'ธ', code: 'KeyT' },
+                { normal: 'ี', shift: 'ํ', code: 'KeyY' },
+                { normal: 'ร', shift: '๊', code: 'KeyU' },
+                { normal: 'น', shift: 'ณ', code: 'KeyI' },
+                { normal: 'ย', shift: 'ฯ', code: 'KeyO' },
+                { normal: 'บ', shift: 'ญ', code: 'KeyP' },
+                { normal: 'ล', shift: 'ฐ', code: 'BracketLeft' },
+                { normal: 'ฃ', shift: 'ฅ', code: 'BracketRight' },
+                { normal: '\\', shift: '|', code: 'Backslash', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Caps', shift: 'Caps', code: 'CapsLock', width: 'w-12 sm:w-14' },
+                { normal: 'ฟ', shift: 'ฤ', code: 'KeyA' },
+                { normal: 'ห', shift: 'ฆ', code: 'KeyS' },
+                { normal: 'ก', shift: 'ฏ', code: 'KeyD' },
+                { normal: 'ด', shift: 'โ', code: 'KeyF' },
+                { normal: 'เ', shift: 'ฌ', code: 'KeyG' },
+                { normal: '้', shift: '็', code: 'KeyH' },
+                { normal: '่', shift: '๋', code: 'KeyJ' },
+                { normal: 'า', shift: 'ษ', code: 'KeyK' },
+                { normal: 'ส', shift: 'ศ', code: 'KeyL' },
+                { normal: 'ว', shift: 'ซ', code: 'Semicolon' },
+                { normal: 'ง', shift: '.', code: 'Quote' },
+                { normal: 'Enter', shift: 'Enter', code: 'Enter', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Shift', shift: 'Shift', code: 'ShiftLeft', width: 'w-14 sm:w-20' },
+                { normal: 'ผ', shift: 'ฉ', code: 'KeyZ' },
+                { normal: 'ป', shift: 'ฮ', code: 'KeyX' },
+                { normal: 'แ', shift: 'ฺ', code: 'KeyC' },
+                { normal: 'อ', shift: '์', code: 'KeyV' },
+                { normal: 'ิ', shift: 'ื', code: 'KeyB' },
+                { normal: 'ท', shift: 'ฒ', code: 'KeyN' },
+                { normal: 'ม', shift: 'ฬ', code: 'KeyM' },
+                { normal: 'ใ', shift: 'ใ', code: 'Comma' },
+                { normal: 'ฝ', shift: 'ฝ', code: 'Period' },
+                { normal: 'ม', shift: '๛', code: 'Slash' },
+                { normal: 'Shift', shift: 'Shift', code: 'ShiftRight', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Space', shift: 'Space', code: 'Space', width: 'w-full' }
+            ]
+        ];
+
+        // English QWERTY Layout Definition
+        const EN_LAYOUT = [
+            [
+                { normal: '`', shift: '~', code: 'Backquote' },
+                { normal: '1', shift: '!', code: 'Digit1' },
+                { normal: '2', shift: '@', code: 'Digit2' },
+                { normal: '3', shift: '#', code: 'Digit3' },
+                { normal: '4', shift: '$', code: 'Digit4' },
+                { normal: '5', shift: '%', code: 'Digit5' },
+                { normal: '6', shift: '^', code: 'Digit6' },
+                { normal: '7', shift: '&', code: 'Digit7' },
+                { normal: '8', shift: '*', code: 'Digit8' },
+                { normal: '9', shift: '(', code: 'Digit9' },
+                { normal: '0', shift: ')', code: 'Digit0' },
+                { normal: '-', shift: '_', code: 'Minus' },
+                { normal: '=', shift: '+', code: 'Equal' },
+                { normal: 'Backspace', shift: 'Backspace', code: 'Backspace', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Tab', shift: 'Tab', code: 'Tab', width: 'w-10 sm:w-12' },
+                { normal: 'q', shift: 'Q', code: 'KeyQ' },
+                { normal: 'w', shift: 'W', code: 'KeyW' },
+                { normal: 'e', shift: 'E', code: 'KeyE' },
+                { normal: 'r', shift: 'R', code: 'KeyR' },
+                { normal: 't', shift: 'T', code: 'KeyT' },
+                { normal: 'y', shift: 'Y', code: 'KeyY' },
+                { normal: 'u', shift: 'U', code: 'KeyU' },
+                { normal: 'i', shift: 'I', code: 'KeyI' },
+                { normal: 'o', shift: 'O', code: 'KeyO' },
+                { normal: 'p', shift: 'P', code: 'KeyP' },
+                { normal: '[', shift: '{', code: 'BracketLeft' },
+                { normal: ']', shift: '}', code: 'BracketRight' },
+                { normal: '\\', shift: '|', code: 'Backslash', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Caps', shift: 'Caps', code: 'CapsLock', width: 'w-12 sm:w-14' },
+                { normal: 'a', shift: 'A', code: 'KeyA' },
+                { normal: 's', shift: 'S', code: 'KeyS' },
+                { normal: 'd', shift: 'D', code: 'KeyD' },
+                { normal: 'f', shift: 'F', code: 'KeyF' },
+                { normal: 'g', shift: 'G', code: 'KeyG' },
+                { normal: 'h', shift: 'H', code: 'KeyH' },
+                { normal: 'j', shift: 'J', code: 'KeyJ' },
+                { normal: 'k', shift: 'K', code: 'KeyK' },
+                { normal: 'l', shift: 'L', code: 'KeyL' },
+                { normal: ';', shift: ':', code: 'Semicolon' },
+                { normal: "'", shift: '"', code: 'Quote' },
+                { normal: 'Enter', shift: 'Enter', code: 'Enter', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Shift', shift: 'Shift', code: 'ShiftLeft', width: 'w-14 sm:w-20' },
+                { normal: 'z', shift: 'Z', code: 'KeyZ' },
+                { normal: 'x', shift: 'X', code: 'KeyX' },
+                { normal: 'c', shift: 'C', code: 'KeyC' },
+                { normal: 'v', shift: 'V', code: 'KeyV' },
+                { normal: 'b', shift: 'B', code: 'KeyB' },
+                { normal: 'n', shift: 'N', code: 'KeyN' },
+                { normal: 'm', shift: 'M', code: 'KeyM' },
+                { normal: ',', shift: '<', code: 'Comma' },
+                { normal: '.', shift: '>', code: 'Period' },
+                { normal: '/', shift: '?', code: 'Slash' },
+                { normal: 'Shift', shift: 'Shift', code: 'ShiftRight', width: 'flex-1' }
+            ],
+            [
+                { normal: 'Space', shift: 'Space', code: 'Space', width: 'w-full' }
+            ]
+        ];
+
+        // Thai Combining Diacritics Set (Combining Vowels & Tone Marks)
+        const THAI_DIACRITICS = new Set([
+            '\u0E31', '\u0E34', '\u0E35', '\u0E36', '\u0E37', '\u0E38', '\u0E39', '\u0E3A',
+            '\u0E47', '\u0E48', '\u0E49', '\u0E4A', '\u0E4B', '\u0E4C', '\u0E4D', '\u0E4E'
+        ]);
+
+        // Default Practice Passages
+        const DEFAULT_TEXTS = {
+            th: [
+                { id: 'th_1', title: 'การฝึกพิมพ์ดีดกับสระวรรณยุกต์', content: 'การพัฒนาทักษะการพิมพ์ต้องฝึกซ้อมอย่างสม่ำเสมอ ทั้งสระและวรรณยุกต์ไทยจะช่วยเพิ่มความเร็ว' },
+                { id: 'th_2', title: 'เทคโนโลยีและอนาคต', content: 'คอมพิวเตอร์และเว็บแอปพลิเคชันยุคใหม่ช่วยให้การเรียนรู้ง่ายและเข้าถึงได้จากทุกที่ทุกเวลา' },
+                { id: 'th_3', title: 'ปรัชญาการทำงาน', content: 'ความพยายามและความใส่ใจในรายละเอียดเล็กๆ น้อยๆ นำไปสู่ผลลัพธ์ที่มีคุณภาพสูงเสมอ' }
+            ],
+            en: [
+                { id: 'en_1', title: 'Typing Speed Mastery', content: 'Mastering speed and accuracy requires persistent daily practice and focus on proper finger placements.' },
+                { id: 'en_2', title: 'Web Development', content: 'Modern web development empowers developers to create seamless interactive browser experiences.' },
+                { id: 'en_3', title: 'Productivity Mindset', content: 'Focusing on single tasks without distraction dramatically boosts efficiency and creative output.' }
+            ]
+        };
+
+        let currentLang = 'th';
+        let currentText = '';
+        let typedHistory = []; // Objects: { char: string, isCorrect: boolean }
+        let typedIndex = 0;
+        let isShiftActive = false;
+        let isCapsLock = false;
+        let errorsCount = 0;
+        
+        let isTestRunning = false;
+        let timerInterval = null;
+        let countdownSeconds = 0; // 0 = unlimited
+        let remainingTime = 0;
+        let elapsedTime = 0;
+
+        let customTexts = [];
+        let practiceHistory = [];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initDarkMode();
+            loadCustomTexts();
+            loadPracticeHistory();
+            buildVirtualKeyboard();
+            initTextSelectOptions();
+            setupEventListeners();
+            resetTest();
+        });
+
+        function initDarkMode() {
+            if (localStorage.theme === 'light' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: light)').matches)) {
+                document.documentElement.classList.remove('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-sun text-amber-500';
+            } else {
+                document.documentElement.classList.add('dark');
+                document.getElementById('theme-icon').className = 'fa-solid fa-moon text-slate-200';
+            }
+        }
+
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.theme = isDark ? 'dark' : 'light';
+            document.getElementById('theme-icon').className = isDark ? 'fa-solid fa-moon text-slate-200' : 'fa-solid fa-sun text-amber-500';
+        }
+
+        function showToast(msg, icon = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = msg;
+            document.getElementById('toast-icon').className = `fa-solid ${icon} text-indigo-400 dark:text-indigo-500`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function addCustomTextObject(title, content, lang) {
+            const newObj = {
+                id: 'custom_' + Date.now() + '_' + Math.floor(Math.random()*1000),
+                title: title,
+                lang: lang,
+                content: content
+            };
+
+            customTexts.push(newObj);
+            saveCustomTexts();
+
+            if (currentLang !== lang) {
+                currentLang = lang;
+                document.getElementById('lang-label').textContent = currentLang === 'th' ? 'ภาษาไทย (TH)' : 'English (EN)';
+                buildVirtualKeyboard();
+            }
+
+            initTextSelectOptions();
+            document.getElementById('text-select').value = newObj.id;
+            currentText = newObj.content;
+            resetTest();
+        }
+
+        function loadCustomTexts() {
+            const saved = localStorage.getItem('typemaster_custom_texts');
+            if (saved) {
+                try { customTexts = JSON.parse(saved); } catch (e) { customTexts = []; }
+            }
+        }
+
+        function saveCustomTexts() {
+            localStorage.setItem('typemaster_custom_texts', JSON.stringify(customTexts));
+            renderCustomTextList();
+            initTextSelectOptions();
+        }
+
+        function loadPracticeHistory() {
+            const saved = localStorage.getItem('typemaster_history');
+            if (saved) {
+                try { practiceHistory = JSON.parse(saved); } catch (e) { practiceHistory = []; }
+            }
+        }
+
+        function saveHistoryItem(item) {
+            practiceHistory.unshift(item);
+            if (practiceHistory.length > 25) practiceHistory.pop();
+            localStorage.setItem('typemaster_history', JSON.stringify(practiceHistory));
+        }
+
+        function clearHistory() {
+            practiceHistory = [];
+            localStorage.removeItem('typemaster_history');
+            renderHistoryList();
+            showToast('ล้างประวัติการทดสอบเรียบร้อยแล้ว');
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'th' ? 'en' : 'th';
+            document.getElementById('lang-label').textContent = currentLang === 'th' ? 'ภาษาไทย (TH)' : 'English (EN)';
+            document.getElementById('keyboard-layout-title').innerHTML = currentLang === 'th' 
+                ? '<i class="fa-solid fa-keyboard text-indigo-500 dark:text-indigo-400"></i> แป้นพิมพ์จำลอง: ภาษาไทย (Kedmanee)'
+                : '<i class="fa-solid fa-keyboard text-indigo-500 dark:text-indigo-400"></i> Virtual Keyboard: English (QWERTY)';
+            
+            buildVirtualKeyboard();
+            initTextSelectOptions();
+            resetTest();
+        }
+
+        function handleTimerSliderChange(val) {
+            countdownSeconds = parseInt(val, 10);
+            const label = document.getElementById('timer-setting-label');
+            const timeTitle = document.getElementById('time-stat-title');
+
+            if (countdownSeconds === 0) {
+                label.textContent = 'ไม่จำกัดเวลา';
+                timeTitle.textContent = 'เวลา (วินาที)';
+            } else {
+                label.textContent = `${countdownSeconds} วินาที`;
+                timeTitle.textContent = 'เวลาเหลือ (วินาที)';
+            }
+
+            if (!isTestRunning) {
+                resetTest();
+            }
+        }
+
+        function initTextSelectOptions() {
+            const select = document.getElementById('text-select');
+            select.innerHTML = '';
+
+            const allTexts = [...DEFAULT_TEXTS[currentLang], ...customTexts.filter(t => t.lang === currentLang)];
+            allTexts.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.id;
+                opt.textContent = t.title;
+                select.appendChild(opt);
+            });
+
+            if (allTexts.length > 0) {
+                currentText = allTexts[0].content;
+            } else {
+                currentText = '';
+            }
+        }
+
+        function loadSelectedText() {
+            const select = document.getElementById('text-select');
+            const selectedId = select.value;
+            const allTexts = [...DEFAULT_TEXTS[currentLang], ...customTexts.filter(t => t.lang === currentLang)];
+            const textObj = allTexts.find(t => t.id === selectedId);
+            if (textObj) {
+                currentText = textObj.content;
+                resetTest();
+            }
+        }
+
+        function buildVirtualKeyboard() {
+            const container = document.getElementById('virtual-keyboard');
+            container.innerHTML = '';
+
+            const layout = currentLang === 'th' ? TH_LAYOUT : EN_LAYOUT;
+
+            layout.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex gap-1 justify-center w-full';
+
+                row.forEach(key => {
+                    const keyBtn = document.createElement('div');
+                    const keyWidth = key.width || 'w-7 sm:w-10';
+                    keyBtn.className = `key-cap ${keyWidth} h-8 sm:h-10 bg-slate-100 dark:bg-slate-700/80 hover:bg-slate-200 dark:hover:bg-slate-600/80 border border-slate-300 dark:border-slate-600/80 rounded-lg flex flex-col items-center justify-center text-slate-800 dark:text-slate-200 text-xs sm:text-sm font-medium shadow-sm cursor-pointer transition-all`;
+                    keyBtn.dataset.code = key.code;
+
+                    const mainLabel = isShiftActive || isCapsLock ? key.shift : key.normal;
+                    const subLabel = (key.normal !== key.shift && !['Backspace','Tab','Caps','Enter','Shift','Space'].includes(key.normal)) ? (isShiftActive ? key.normal : key.shift) : '';
+
+                    keyBtn.innerHTML = `
+                        <span class="key-main pointer-events-none">${mainLabel}</span>
+                        ${subLabel ? `<span class="text-[9px] opacity-40 -mt-1 pointer-events-none">${subLabel}</span>` : ''}
+                    `;
+
+                    keyBtn.addEventListener('click', () => handleVirtualKeyPress(key));
+                    rowDiv.appendChild(keyBtn);
+                });
+
+                container.appendChild(rowDiv);
+            });
+        }
+
+        function updateTargetKeyHighlight() {
+            document.querySelectorAll('.key-cap.target').forEach(el => el.classList.remove('target'));
+
+            if (typedIndex >= currentText.length) return;
+
+            const targetChar = currentText[typedIndex];
+            const layout = currentLang === 'th' ? TH_LAYOUT : EN_LAYOUT;
+
+            let foundCode = null;
+            let needsShift = false;
+
+            for (let row of layout) {
+                for (let k of row) {
+                    if (k.normal === targetChar) {
+                        foundCode = k.code;
+                        needsShift = false;
+                        break;
+                    } else if (k.shift === targetChar) {
+                        foundCode = k.code;
+                        needsShift = true;
+                        break;
+                    }
+                }
+                if (foundCode) break;
+            }
+
+            if (foundCode) {
+                const targetEl = document.querySelector(`.key-cap[data-code="${foundCode}"]`);
+                if (targetEl) targetEl.classList.add('target');
+
+                if (needsShift) {
+                    document.querySelectorAll('.key-cap[data-code="ShiftLeft"], .key-cap[data-code="ShiftRight"]').forEach(el => el.classList.add('target'));
+                }
+            } else if (targetChar === ' ') {
+                const spaceEl = document.querySelector('.key-cap[data-code="Space"]');
+                if (spaceEl) spaceEl.classList.add('target');
+            }
+        }
+
+        function renderTextDisplay() {
+            const display = document.getElementById('text-display');
+            display.innerHTML = '';
+
+            for (let i = 0; i < currentText.length; i++) {
+                const char = currentText[i];
+                const span = document.createElement('span');
+                span.id = `char-${i}`;
+
+                const isDiacritic = THAI_DIACRITICS.has(char);
+
+                if (i < typedIndex) {
+                    const status = typedHistory[i];
+                    if (status && status.isCorrect) {
+                        span.textContent = char;
+                        span.className = 'char-correct';
+                    } else {
+                        if (isDiacritic) {
+                            span.textContent = `◌${char}`;
+                            span.className = 'char-incorrect-diacritic';
+                        } else {
+                            span.textContent = char;
+                            span.className = 'char-incorrect';
+                        }
+                    }
+                } else if (i === typedIndex) {
+                    span.textContent = char;
+                    span.className = 'char-current';
+                } else {
+                    span.textContent = char;
+                    span.className = 'char-default';
+                }
+
+                display.appendChild(span);
+            }
+
+            const currentCharEl = document.getElementById(`char-${typedIndex}`);
+            if (currentCharEl) {
+                currentCharEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            updateTargetKeyHighlight();
+        }
+
+        function focusTypingInput() {
+            if (!isTestRunning) {
+                startTestExplicit();
+            }
+            document.getElementById('type-input').focus();
+            document.getElementById('focus-overlay').classList.add('opacity-0', 'pointer-events-none');
+        }
+
+        function handleInputCharacter(inputChar) {
+            if (!isTestRunning) return;
+
+            if (typedIndex >= currentText.length) return;
+
+            const expectedChar = currentText[typedIndex];
+            const isCorrect = inputChar === expectedChar;
+
+            if (!isCorrect) {
+                errorsCount++;
+                document.getElementById('stat-errors').textContent = errorsCount;
+            }
+
+            typedHistory[typedIndex] = { char: inputChar, isCorrect: isCorrect };
+            typedIndex++;
+
+            renderTextDisplay();
+            updateStats();
+
+            if (typedIndex >= currentText.length) {
+                finishTest('เสร็จสิ้นบทความแล้ว!');
+            }
+        }
+
+        function handleVirtualKeyPress(keyObj) {
+            focusTypingInput();
+            if (keyObj.code === 'Backspace') {
+                handleBackspace();
+            } else if (keyObj.code === 'Space') {
+                handleInputCharacter(' ');
+            } else if (!['Tab','CapsLock','ShiftLeft','ShiftRight','Enter'].includes(keyObj.code)) {
+                const char = isShiftActive || isCapsLock ? keyObj.shift : keyObj.normal;
+                handleInputCharacter(char);
+            }
+        }
+
+        function handleBackspace() {
+            if (!isTestRunning) return;
+            if (typedIndex > 0) {
+                typedIndex--;
+                typedHistory.pop();
+                renderTextDisplay();
+                updateStats();
+            }
+        }
+
+        function setupEventListeners() {
+            const input = document.getElementById('type-input');
+
+            input.addEventListener('input', (e) => {
+                const val = e.target.value;
+                if (!val) return;
+
+                const inputChar = val[val.length - 1];
+                handleInputCharacter(inputChar);
+
+                e.target.value = '';
+            });
+
+            window.addEventListener('keydown', (e) => {
+                const keyEl = document.querySelector(`.key-cap[data-code="${e.code}"]`);
+                if (keyEl) keyEl.classList.add('active');
+
+                if (e.key === 'Backspace') {
+                    handleBackspace();
+                }
+
+                if (e.key === 'Shift') {
+                    isShiftActive = true;
+                    document.getElementById('shift-indicator').classList.remove('hidden');
+                    buildVirtualKeyboard();
+                }
+
+                if (e.code === 'CapsLock') {
+                    isCapsLock = !isCapsLock;
+                    const indicator = document.getElementById('caps-indicator');
+                    if (isCapsLock) indicator.classList.remove('hidden');
+                    else indicator.classList.add('hidden');
+                    buildVirtualKeyboard();
+                }
+
+                if (!e.altKey && !e.ctrlKey && !e.metaKey && (e.key.length === 1 || e.key === 'Backspace')) {
+                    if (isTestRunning) {
+                        focusTypingInput();
+                    }
+                }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                const keyEl = document.querySelector(`.key-cap[data-code="${e.code}"]`);
+                if (keyEl) keyEl.classList.remove('active');
+
+                if (e.key === 'Shift') {
+                    isShiftActive = false;
+                    document.getElementById('shift-indicator').classList.add('hidden');
+                    buildVirtualKeyboard();
+                }
+            });
+        }
+
+        function startTestExplicit() {
+            if (isTestRunning) return;
+
+            isTestRunning = true;
+            updateExecutionUI(true);
+
+            document.getElementById('focus-overlay').classList.add('opacity-0', 'pointer-events-none');
+            document.getElementById('type-input').focus();
+
+            timerInterval = setInterval(() => {
+                elapsedTime++;
+
+                if (countdownSeconds > 0) {
+                    remainingTime--;
+                    document.getElementById('stat-time').textContent = remainingTime;
+
+                    if (remainingTime <= 0) {
+                        finishTest('หมดเวลาการทดสอบ!');
+                        return;
+                    }
+                } else {
+                    document.getElementById('stat-time').textContent = elapsedTime;
+                }
+
+                updateStats();
+            }, 1000);
+
+            showToast('ระบบฝึกพิมพ์เริ่มทำงานแล้ว', 'fa-play');
+        }
+
+        function stopTestExplicit() {
+            if (!isTestRunning) return;
+
+            isTestRunning = false;
+            clearInterval(timerInterval);
+            updateExecutionUI(false);
+
+            const overlay = document.getElementById('focus-overlay');
+            document.getElementById('overlay-icon-container').className = "w-12 h-12 bg-amber-500 text-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-amber-500/30";
+            document.getElementById('overlay-icon').className = "fa-solid fa-pause";
+            document.getElementById('focus-message').innerHTML = `
+                <span class="text-amber-400 font-bold text-base block mb-1">⏸ หยุดการทำงานชั่วคราว</span>
+                <span class="text-xs text-slate-200">กดปุ่ม "เริ่มทำงาน" หรือคลิกที่นี่เพื่อลุยต่อ</span>
+            `;
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+
+            showToast('หยุดการทำงานชั่วคราว', 'fa-pause');
+        }
+
+        function updateExecutionUI(running) {
+            const startBtn = document.getElementById('start-btn');
+            const stopBtn = document.getElementById('stop-btn');
+            const statusDot = document.getElementById('status-dot');
+            const statusText = document.getElementById('status-text');
+
+            if (running) {
+                startBtn.disabled = true;
+                startBtn.classList.add('opacity-40', 'cursor-not-allowed');
+                stopBtn.disabled = false;
+
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+                statusText.textContent = "กำลังทำงาน";
+                statusText.className = "text-xs font-semibold text-emerald-600 dark:text-emerald-400";
+            } else {
+                startBtn.disabled = false;
+                startBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+                stopBtn.disabled = true;
+
+                statusDot.className = "w-2.5 h-2.5 rounded-full bg-slate-400";
+                statusText.textContent = "หยุดทำงาน";
+                statusText.className = "text-xs font-semibold text-slate-600 dark:text-slate-300";
+            }
+        }
+
+        function finishTest(reasonMsg = 'ฝึกพิมพ์เสร็จเรียบร้อย!') {
+            isTestRunning = false;
+            clearInterval(timerInterval);
+            updateExecutionUI(false);
+
+            const timeUsed = countdownSeconds > 0 ? (countdownSeconds - remainingTime) : elapsedTime;
+            const finalWPM = parseInt(document.getElementById('stat-wpm').textContent) || 0;
+            const finalAccuracy = parseInt(document.getElementById('stat-accuracy').textContent) || 0;
+
+            const historyItem = {
+                date: new Date().toLocaleString('th-TH'),
+                lang: currentLang.toUpperCase(),
+                wpm: finalWPM,
+                accuracy: finalAccuracy,
+                time: Math.max(timeUsed, 1),
+                errors: errorsCount
+            };
+            saveHistoryItem(historyItem);
+
+            const overlay = document.getElementById('focus-overlay');
+            document.getElementById('overlay-icon-container').className = "w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-emerald-500/30 animate-bounce";
+            document.getElementById('overlay-icon').className = "fa-solid fa-trophy";
+            document.getElementById('focus-message').innerHTML = `
+                <span class="text-emerald-400 dark:text-emerald-300 font-bold text-lg block mb-1">🎉 ${reasonMsg}</span>
+                <span class="text-xs text-slate-200">ความเร็ว: ${finalWPM} WPM | ความถูกต้อง: ${finalAccuracy}% | เวลาที่ใช้: ${timeUsed}s</span><br>
+                <span class="text-xs text-indigo-300 mt-2 block underline cursor-pointer" onclick="resetTest()">คลิกที่นี่เพื่อเริ่มฝึกซ้อมใหม่อีกครั้ง</span>
+            `;
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            showToast('บันทึกผลการทดสอบสำเร็จ!', 'fa-trophy');
+        }
+
+        function resetTest() {
+            isTestRunning = false;
+            clearInterval(timerInterval);
+            updateExecutionUI(false);
+
+            typedIndex = 0;
+            typedHistory = [];
+            errorsCount = 0;
+            elapsedTime = 0;
+            remainingTime = countdownSeconds;
+
+            document.getElementById('stat-wpm').textContent = '0';
+            document.getElementById('stat-accuracy').textContent = '100%';
+            document.getElementById('stat-time').textContent = countdownSeconds > 0 ? countdownSeconds : '0';
+            document.getElementById('stat-errors').textContent = '0';
+
+            const overlay = document.getElementById('focus-overlay');
+            document.getElementById('overlay-icon-container').className = "w-12 h-12 bg-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/30 animate-bounce";
+            document.getElementById('overlay-icon').className = "fa-solid fa-play";
+            document.getElementById('focus-message').textContent = 'กดปุ่ม "เริ่มทำงาน" หรือคลิกที่นี่เพื่อเริ่มฝึกพิมพ์';
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+
+            renderTextDisplay();
+        }
+
+        function updateStats() {
+            const timeUsed = countdownSeconds > 0 ? (countdownSeconds - remainingTime) : elapsedTime;
+            const minutesUsed = Math.max(timeUsed, 1) / 60;
+
+            const correctChars = typedHistory.filter(item => item && item.isCorrect).length;
+            const wordsTyped = correctChars / 5;
+            const wpm = Math.round(wordsTyped / minutesUsed);
+            document.getElementById('stat-wpm').textContent = isNaN(wpm) || wpm < 0 ? 0 : wpm;
+
+            const accuracy = typedIndex === 0 ? 100 : Math.max(Math.round((correctChars / typedIndex) * 100), 0);
+            document.getElementById('stat-accuracy').textContent = `${accuracy}%`;
+        }
+
+        function handleAddText(e) {
+            e.preventDefault();
+            const title = document.getElementById('new-text-title').value.trim();
+            const lang = document.getElementById('new-text-lang').value;
+            const content = document.getElementById('new-text-content').value.trim();
+
+            if (!title || !content) return;
+
+            addCustomTextObject(title, content, lang);
+            document.getElementById('add-text-form').reset();
+            toggleModal('manage-modal');
+        }
+
+        function deleteCustomText(id) {
+            customTexts = customTexts.filter(t => t.id !== id);
+            saveCustomTexts();
+            showToast('ลบบทความเรียบร้อยแล้ว');
+        }
+
+        function renderCustomTextList() {
+            const listContainer = document.getElementById('custom-text-list');
+            listContainer.innerHTML = '';
+
+            if (customTexts.length === 0) {
+                listContainer.innerHTML = `<p class="text-xs text-slate-400 italic">ยังไม่มีบทความที่กำหนดเอง</p>`;
+                return;
+            }
+
+            customTexts.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-2.5 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs shadow-sm';
+                div.innerHTML = `
+                    <div class="truncate mr-2">
+                        <span class="font-semibold text-slate-700 dark:text-slate-200">${item.title}</span>
+                        <span class="ml-1.5 px-1.5 py-0.5 text-[10px] rounded bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 font-bold">${item.lang.toUpperCase()}</span>
+                    </div>
+                    <button onclick="deleteCustomText('${item.id}')" class="text-slate-400 hover:text-rose-500 transition-colors p-1" title="ลบ">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        function renderHistoryList() {
+            const container = document.getElementById('history-list');
+            container.innerHTML = '';
+
+            if (practiceHistory.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 italic text-center py-4">ยังไม่มีประวัติการฝึกซ้อม</p>`;
+                return;
+            }
+
+            practiceHistory.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'p-3 bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-700/60 rounded-xl text-xs flex justify-between items-center shadow-sm';
+                div.innerHTML = `
+                    <div>
+                        <div class="text-slate-700 dark:text-slate-200 font-semibold mb-0.5">${item.date} (${item.lang})</div>
+                        <div class="text-slate-500 dark:text-slate-400 text-[11px]">เวลาที่ใช้: ${item.time} วินาที | พิมพ์ผิด: ${item.errors} ครั้ง</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-indigo-600 dark:text-indigo-400 font-bold text-sm">${item.wpm} WPM</div>
+                        <div class="text-emerald-600 dark:text-emerald-400 text-[11px]">${item.accuracy}% แม่นยำ</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function toggleModal(id) {
+            const modal = document.getElementById(id);
+            if (modal) {
+                modal.classList.toggle('hidden');
+                if (id === 'manage-modal') renderCustomTextList();
+                if (id === 'history-modal') renderHistoryList();
+            }
+        }
+    </script>
+</body>
+</html>
